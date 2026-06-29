@@ -1405,10 +1405,30 @@
       const submit = document.createElement('button');
       submit.className = 'q-btn-continue';
       submit.textContent = 'Submit to Concierge →';
-      submit.addEventListener('click', () => {
+      submit.addEventListener('click', async () => {
         answers.name  = document.getElementById('qName')?.value  || '';
         answers.email = document.getElementById('qEmail')?.value || '';
         answers.phone = document.getElementById('qPhone')?.value || '';
+
+        submit.textContent = 'Transmitting…';
+        submit.disabled = true;
+
+        try {
+          await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name:          answers.name,
+              email:         answers.email,
+              phone:         answers.phone,
+              duration:      answers.duration,
+              style:         answers.style,
+              destinations:  answers.destinations,
+              accommodation: answers.accommodation,
+            }),
+          });
+        } catch (_) { /* fail silently, advance regardless */ }
+
         advance(idx);
       });
       nav.appendChild(submit);
