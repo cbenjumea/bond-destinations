@@ -3,10 +3,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const keyPreview = process.env.RESEND_API_KEY
-    ? process.env.RESEND_API_KEY.slice(0, 8) + '…'
-    : 'NOT SET';
-  console.log('RESEND_API_KEY:', keyPreview);
 
   const { name, email, phone, duration, style, destinations, accommodation } = req.body;
 
