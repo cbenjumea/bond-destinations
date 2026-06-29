@@ -1391,48 +1391,42 @@
             <input type="tel" id="qPhone" placeholder="+44 20 0000 0000" autocomplete="tel"/>
           </div>
           <p class="q-form-note">Your enquiry and contact details will be shared with your concierge, who will contact you soon.</p>
+          <div style="display:flex;gap:14px;margin-top:10px;">
+            <button class="q-btn-back" id="qFormBack">← Back</button>
+            <button class="q-btn-continue" id="qFormSubmit">Submit to Concierge →</button>
+          </div>
         </div>`;
-      setTimeout(() => optsEl.classList.add('show'), 40);
+      setTimeout(() => {
+        optsEl.classList.add('show');
+        document.getElementById('qFormBack').addEventListener('click', () => transition(idx - 1));
+        document.getElementById('qFormSubmit').addEventListener('click', async () => {
+          const btn = document.getElementById('qFormSubmit');
+          answers.name  = document.getElementById('qName')?.value  || '';
+          answers.email = document.getElementById('qEmail')?.value || '';
+          answers.phone = document.getElementById('qPhone')?.value || '';
 
-      const nav = navEl;
-      if (idx > 0) {
-        const back = document.createElement('button');
-        back.className = 'q-btn-back';
-        back.textContent = '← Back';
-        back.addEventListener('click', () => transition(idx - 1));
-        nav.appendChild(back);
-      }
-      const submit = document.createElement('button');
-      submit.className = 'q-btn-continue';
-      submit.textContent = 'Submit to Concierge →';
-      submit.addEventListener('click', async () => {
-        answers.name  = document.getElementById('qName')?.value  || '';
-        answers.email = document.getElementById('qEmail')?.value || '';
-        answers.phone = document.getElementById('qPhone')?.value || '';
+          btn.textContent = 'Transmitting…';
+          btn.disabled = true;
 
-        submit.textContent = 'Transmitting…';
-        submit.disabled = true;
+          try {
+            await fetch('/api/contact', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name:          answers.name,
+                email:         answers.email,
+                phone:         answers.phone,
+                duration:      answers.duration,
+                style:         answers.style,
+                destinations:  answers.destinations,
+                accommodation: answers.accommodation,
+              }),
+            });
+          } catch (_) { /* fail silently */ }
 
-        try {
-          await fetch('/api/contact', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name:          answers.name,
-              email:         answers.email,
-              phone:         answers.phone,
-              duration:      answers.duration,
-              style:         answers.style,
-              destinations:  answers.destinations,
-              accommodation: answers.accommodation,
-            }),
-          });
-        } catch (_) { /* fail silently, advance regardless */ }
-
-        advance(idx);
-      });
-      nav.appendChild(submit);
-      setTimeout(() => nav.classList.add('show'), 40);
+          advance(idx);
+        });
+      }, 40);
       return;
     }
 
